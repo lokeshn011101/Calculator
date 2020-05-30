@@ -105,7 +105,9 @@ class Calculator extends React.Component {
     this.minusFlag = false;
     this.TotArray = [];
     this.currentValue = "";
-    this.defaultValue = 0;
+    this.equalClick = false;
+    this.decimalFlag = false;
+    this.Result = 0;
     this.setState({
       currentOp: "",
       currentNumber: 0,
