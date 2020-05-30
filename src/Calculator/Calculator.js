@@ -10,6 +10,7 @@ class Calculator extends React.Component {
   };
 
   Numbers = (number) => {
+    this.decimalFlag = false;
     if (this.equalClick) {
       this.Display = "";
       this.Operation = "";
@@ -21,66 +22,81 @@ class Calculator extends React.Component {
     this.Operation = this.currentValue;
     this.Display += number;
     this.setState({ currentNumber: this.currentValue });
+    this.firstClick = false;
   };
 
   Operators = (op) => {
-    if (this.equalClick) {
-      this.Display = this.state.result.toString();
-      this.Operation = "";
-      this.TotArray = [this.state.result.toString()];
-      this.equalClick = false;
-    }
-    if (this.currentValue !== "") {
-      this.TotArray.push(this.currentValue);
-    }
-    if (
-      (op === "*" || op === "/") &&
-      (this.TotArray[this.TotArray.length - 1] === "*" ||
-        this.TotArray[this.TotArray.length - 1] === "/")
-    ) {
-      this.TotArray.pop();
-      this.Display = this.Display.slice(0, this.Display.length - 1);
-      this.Operation = op;
+    if (!this.firstClick) {
       this.firstClick = false;
-      this.setState({ currentOp: op });
-    }
-    this.minusFlag = false;
-    this.TotArray.push(op);
-    this.Display += op;
-    this.currentValue = "";
-    this.Operation = op;
-    if (
-      op === "-" &&
-      !this.minusFlag &&
-      isNaN(Number(this.TotArray[this.TotArray.length - 2]))
-    ) {
-      this.currentValue = op;
+      this.decimalFlag = false;
+      if (this.equalClick) {
+        this.Display = this.state.result.toString();
+        this.Operation = "";
+        this.TotArray = [this.state.result.toString()];
+        this.equalClick = false;
+      }
+      if (this.currentValue !== "") {
+        this.TotArray.push(this.currentValue);
+      }
+      if (
+        (op === "*" || op === "/") &&
+        (this.TotArray[this.TotArray.length - 1] === "*" ||
+          this.TotArray[this.TotArray.length - 1] === "/")
+      ) {
+        this.TotArray.pop();
+        this.Display = this.Display.slice(0, this.Display.length - 1);
+        this.Operation = op;
+        this.setState({ currentOp: op });
+      }
+      this.minusFlag = false;
+      this.TotArray.push(op);
+      this.Display += op;
+      this.currentValue = "";
       this.Operation = op;
-      this.minusFlag = true;
-      this.TotArray.pop();
+      if (
+        op === "-" &&
+        !this.minusFlag &&
+        isNaN(Number(this.TotArray[this.TotArray.length - 2]))
+      ) {
+        this.currentValue = op;
+        this.Operation = op;
+        this.minusFlag = true;
+        this.TotArray.pop();
+        this.setState({ currentOp: op });
+      }
+      if (
+        op === "+" &&
+        (this.TotArray[this.TotArray.length - 2] === "+" ||
+          this.TotArray[this.TotArray.length - 2] === "-" ||
+          this.TotArray[this.TotArray.length - 2] === "*" ||
+          this.TotArray[this.TotArray.length - 2] === "/")
+      ) {
+        this.TotArray.pop();
+        this.Display = this.Display.slice(0, this.Display.length - 1);
+        this.setState({ currentOp: this.TotArray[this.TotArray.length - 2] });
+      }
+      if (
+        op === "-" &&
+        (this.TotArray[this.TotArray.length - 2] === "+" ||
+          this.TotArray[this.TotArray.length - 2] === "-" ||
+          this.TotArray[this.TotArray.length - 2] === "*" ||
+          this.TotArray[this.TotArray.length - 2] === "/")
+      ) {
+        this.TotArray.pop();
+        this.Display = this.Display.slice(0, this.Display.length - 1);
+        this.setState({ currentOp: this.TotArray[this.TotArray.length - 2] });
+      }
+      if (
+        (op === "*" || op === "/") &&
+        (this.TotArray[this.TotArray.length - 2] === "+" ||
+          this.TotArray[this.TotArray.length - 2] === "-")
+      ) {
+        this.TotArray.pop();
+        this.Display = this.Display.slice(0, this.Display.length - 1);
+        this.Operation = this.TotArray[this.TotArray.length - 1];
+      }
       this.setState({ currentOp: op });
     }
-    if (
-      op === "+" &&
-      (this.TotArray[this.TotArray.length - 2] === "+" ||
-        this.TotArray[this.TotArray.length - 2] === "-" ||
-        this.TotArray[this.TotArray.length - 2] === "*" ||
-        this.TotArray[this.TotArray.length - 2] === "/")
-    ) {
-      this.TotArray.pop();
-      this.Display = this.Display.slice(0, this.Display.length - 1);
-      this.setState({ currentOp: this.TotArray[this.TotArray.length - 2] });
-    }
-    if (
-      (op === "*" || op === "/") &&
-      (this.TotArray[this.TotArray.length - 2] === "+" ||
-        this.TotArray[this.TotArray.length - 2] === "-")
-    ) {
-      this.TotArray.pop();
-      this.Display = this.Display.slice(0, this.Display.length - 1);
-      this.Operation = this.TotArray[this.TotArray.length - 1];
-    }
-    this.setState({ currentOp: op });
   };
   DelEverything = () => {
     this.firstClick = true;
@@ -94,13 +110,32 @@ class Calculator extends React.Component {
       currentOp: "",
       currentNumber: 0,
       currentTask: "",
+      result: 0,
     });
+  };
+  Decimals = () => {
+    if (this.firstClick) {
+      this.Display += "0.";
+      this.Operation += "0.";
+      this.currentValue += "0.";
+      this.setState({ currentNumber: this.currentValue });
+    }
+    if (
+      isNaN(Number(this.TotArray[this.TotArray.length - 1])) &&
+      !this.firstClick &&
+      !this.decimalFlag
+    ) {
+      this.decimalFlag = true;
+      this.currentValue += ".";
+      this.Operation += ".";
+      this.Display += ".";
+      this.setState({ currentNumber: this.currentValue });
+    }
   };
   Equals = () => {
     if (this.currentValue !== "" && !isNaN(Number(this.currentValue))) {
       this.TotArray.push(this.currentValue);
       this.currentValue = "";
-      console.log(this.TotArray);
       this.Result = eval(this.TotArray.join(" "));
       this.Display += "=" + this.Result;
       this.Operation = this.Result;
@@ -108,6 +143,7 @@ class Calculator extends React.Component {
       this.setState({ result: this.Result });
     }
   };
+  decimalFlag = false;
   Result = 0;
   equalClick = false;
   Display = "";
@@ -115,12 +151,18 @@ class Calculator extends React.Component {
   Operation = "";
   TotArray = [];
   currentValue = "";
+  firstClick = true;
+
   render() {
+    let calcDisplay = 0;
+    if (!this.firstClick) {
+      calcDisplay = this.Operation;
+    }
     return (
       <div id="calc-container">
         <div className="display">
           <div className="bdisplay">{this.Display}</div>
-          <div className="disp">{this.Operation}</div>
+          <div className="disp">{calcDisplay}</div>
         </div>
         <div
           className="ac box"
@@ -250,7 +292,14 @@ class Calculator extends React.Component {
         >
           0
         </div>
-        <div className="decimal box">.</div>
+        <div
+          className="decimal box"
+          onClick={() => {
+            this.Decimals();
+          }}
+        >
+          .
+        </div>
       </div>
     );
   }
