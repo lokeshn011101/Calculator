@@ -6,6 +6,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="container">
+        <header>Designed and Coded by Lokesh N N</header>
         <Calculator />
       </div>
     );
